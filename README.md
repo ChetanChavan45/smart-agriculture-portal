@@ -22,7 +22,7 @@ A modern, full-stack smart agriculture platform connecting farmers, agricultural
 ![Dashboard](assets/dashboard.png)
 
 **Dynamic Crop Search Page**  
-![Crop Search](assets/home.png)
+![Crop Search](assets/crops.png)
 
 **AI Machine Learning Recommendation System**  
 ![ML Recommendation](assets/ml.png)
