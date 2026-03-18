@@ -1,0 +1,240 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <!-- Main Form Section -->
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0 rounded-4 mb-4">
+            <div class="card-header bg-success text-white py-3 rounded-top-4 d-flex align-items-center">
+                <i class="bi bi-robot fs-4 me-2"></i>
+                <h4 class="mb-0 fw-bold">AI Crop Recommendation System</h4>
+            </div>
+            
+            <div class="card-body p-4 p-md-5">
+                <p class="text-muted text-center mb-5">Select your environmental conditions below. Our Machine Learning engine will analyze the data and generate top suitability predictions tailored specifically to your farm.</p>
+                
+                <form id="recommendationForm" class="row g-4 justify-content-center shadow-sm p-4 rounded-4 border border-light bg-white">
+                    {% csrf_token %}
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold"><i class="bi bi-layer-backward me-1 text-success"></i>Soil Type</label>
+                        <select class="form-select form-select-lg" name="soil" required>
+                            <option value="" selected disabled>Select Soil...</option>
+                            <option value="sandy">Sandy</option>
+                            <option value="clay">Clay</option>
+                            <option value="loamy">Loamy</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold"><i class="bi bi-sun me-1 text-warning"></i>Season</label>
+                        <select class="form-select form-select-lg" name="season" required>
+                            <option value="" selected disabled>Select Season...</option>
+                            <option value="summer">Summer</option>
+                            <option value="winter">Winter</option>
+                            <option value="rainy">Rainy</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold"><i class="bi bi-droplet-fill me-1 text-primary"></i>Water Supply</label>
+                        <select class="form-select form-select-lg" name="water" required>
+                            <option value="" selected disabled>Select Water Level...</option>
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-12 text-center mt-5">
+                        <button type="submit" class="btn btn-success btn-lg px-5 shadow rounded-pill" id="submitBtn">
+                            <i class="bi bi-cpu-fill me-2"></i> Get Crop Recommendation
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Processing State -->
+                <div id="processingSection" class="text-center py-5 d-none">
+                    <div class="spinner-border text-success" role="status" style="width: 4rem; height: 4rem;">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <h4 class="mt-4 text-success fw-bold">Analyzing Agricultural Data...</h4>
+                    <p class="text-muted">Running Scikit-Learn ML Classifier Engine</p>
+                </div>
+
+                <!-- Result Section -->
+                <div id="resultSection" class="mt-4 d-none">
+                    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+                        <h4 class="fw-bold text-dark mb-0"><i class="bi bi-stars text-warning me-2"></i>Top Recommendations</h4>
+                        <button class="btn btn-sm btn-outline-success rounded-pill px-4 shadow-sm fw-bold" onclick="resetForm()"><i class="bi bi-arrow-repeat me-1"></i> New Analysis</button>
+                    </div>
+                    <div id="recommendationCards" class="d-flex flex-column gap-3">
+                        <!-- Dynamic Cards Injected Here via JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Sidebar / History Section -->
+    <div class="col-lg-4">
+        <div class="card shadow-sm border-0 rounded-4 h-100 bg-white border-start border-4 border-success">
+            <div class="card-header bg-transparent py-4 border-0">
+                <h5 class="fw-bold text-dark mb-0"><i class="bi bi-clock-history text-secondary me-2"></i>Analysis History</h5>
+                <p class="small text-muted mb-0 mt-1">Your last 3 ML queries</p>
+            </div>
+            <div class="card-body pt-0 px-4" id="historyContainer">
+                <div class="text-center py-5 text-muted" id="emptyHistory">
+                    <i class="bi bi-inbox fs-1 opacity-25 d-block mb-3"></i>
+                    No previous analysis found.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // System to handle the LocalStorage History
+    function saveToHistory(soil, season, water, topCrop) {
+        let history = JSON.parse(localStorage.getItem('cropHistory')) || [];
+        // Put the latest at the beginning
+        history.unshift({ soil, season, water, crop: topCrop, date: new Date().toLocaleTimeString() });
+        // Keep only top 3
+        if(history.length > 3) history.pop();
+        localStorage.setItem('cropHistory', JSON.stringify(history));
+        renderHistory();
+    }
+
+    function renderHistory() {
+        let history = JSON.parse(localStorage.getItem('cropHistory')) || [];
+        const container = document.getElementById('historyContainer');
+        const emptyState = document.getElementById('emptyHistory');
+        
+        if (history.length > 0) {
+            if(emptyState) emptyState.classList.add('d-none');
+            
+            // Clear existing elements besides empty state
+            const items = container.querySelectorAll('.history-item');
+            items.forEach(item => item.remove());
+
+            history.forEach(item => {
+                let cardHtml = `
+                <div class="history-item bg-light p-3 rounded-4 mb-3 border">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="badge bg-success shadow-sm px-3 py-2 fw-bold"><i class="bi bi-check-circle-fill me-1"></i> ${item.crop.split(',')[0]}</span>
+                        <small class="text-muted"><i class="bi bi-clock"></i> ${item.date}</small>
+                    </div>
+                    <div class="small text-muted mt-2 border-top pt-2">
+                        <strong>Inputs:</strong> ${item.soil} | ${item.season} | ${item.water}
+                    </div>
+                </div>`;
+                container.innerHTML += cardHtml;
+            });
+        }
+    }
+
+    // Call on load
+    document.addEventListener("DOMContentLoaded", renderHistory);
+
+    // Form Submission with AI UI flow
+    document.getElementById('recommendationForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const form = document.getElementById('recommendationForm');
+        const processing = document.getElementById('processingSection');
+        const resultSection = document.getElementById('resultSection');
+        const cardsContainer = document.getElementById('recommendationCards');
+
+        form.classList.add('d-none');
+        resultSection.classList.add('d-none');
+        processing.classList.remove('d-none');
+
+        const formData = new FormData(this);
+        const data = Object.fromEntries(formData.entries());
+        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        // Artificial 1.5s delay to simulate Deep Learning calculation
+        setTimeout(() => {
+            fetch('{% url "crop_recommend" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                processing.classList.add('d-none');
+                
+                if(result.success) {
+                    cardsContainer.innerHTML = '';
+                    
+                    // Render the 3 array outputs
+                    result.recommendations.forEach((rec, index) => {
+                        let rankBadge = index === 0 ? '<span class="badge bg-warning text-dark px-3 py-2 ms-2 fw-bold"><i class="bi bi-trophy-fill me-1"></i> Top Match</span>' : '';
+                        let colorClass = index === 0 ? 'success' : (index === 1 ? 'info' : 'secondary');
+                        
+                        // Parse bullets
+                        let bulletsHtml = rec.reasons.map(r => `<li class="mb-2"><i class="bi bi-check-circle-fill text-${colorClass} me-2"></i>${r}</li>`).join('');
+
+                        let html = `
+                        <div class="card border border-${colorClass} border-opacity-25 shadow-sm rounded-4 w-100 overflow-hidden">
+                            <div class="card-body p-0">
+                                <div class="d-flex align-items-center bg-${colorClass} bg-opacity-10 py-3 px-4 border-bottom border-${colorClass} border-opacity-10">
+                                    <div class="rounded-circle bg-${colorClass} text-white d-flex justify-content-center align-items-center fs-4 me-3 shadow-sm" style="width: 50px; height: 50px;">
+                                        #${index+1}
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h4 class="fw-bold mb-0 text-dark d-flex align-items-center">
+                                            ${rec.crop} ${rankBadge}
+                                        </h4>
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="fw-bold fs-5 text-${colorClass}">${rec.confidence}% <i class="bi bi-shield-check"></i></div>
+                                        <small class="text-muted">Confidence</small>
+                                    </div>
+                                </div>
+                                <div class="px-4 py-3 bg-white">
+                                    <h6 class="fw-bold text-muted text-uppercase small mb-3">Why this crop is recommended:</h6>
+                                    <ul class="list-unstyled mb-0 text-dark small lh-lg">
+                                        ${bulletsHtml}
+                                    </ul>
+                                    
+                                    <div class="progress mt-4" style="height: 6px;">
+                                        <div class="progress-bar bg-${colorClass}" role="progressbar" style="width: ${rec.confidence}%;" aria-valuenow="${rec.confidence}" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`;
+                        cardsContainer.innerHTML += html;
+                    });
+
+                    // Save history
+                    saveToHistory(data.soil, data.season, data.water, result.recommendations[0].crop);
+                    
+                    if(window.showToast) {
+                        showToast("Analysis complete. Found 3 optimal crop matches!");
+                    }
+
+                    resultSection.classList.remove('d-none');
+                } else {
+                    form.classList.remove('d-none');
+                    if(window.showToast) showToast(result.error || "System Error processing request.", true);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                processing.classList.add('d-none');
+                form.classList.remove('d-none');
+                if(window.showToast) showToast("Connection failed to ML Engine.", true);
+            });
+        }, 1500); // 1.5 seconds loading UI
+    });
+
+    function resetForm() {
+        document.getElementById('recommendationForm').reset();
+        document.getElementById('recommendationForm').classList.remove('d-none');
+        document.getElementById('resultSection').classList.add('d-none');
+    }
+</script>
+{% endblock %}

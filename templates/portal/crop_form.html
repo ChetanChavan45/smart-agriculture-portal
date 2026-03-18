@@ -1,33 +1,68 @@
 {% extends 'base.html' %}
+{% load crispy_forms_tags %}
 
 {% block content %}
 <div class="row justify-content-center">
-    <div class="col-md-9 mb-5">
-        <div class="card shadow-sm border-0 mt-4 rounded-4 overflow-hidden">
-            <div class="card-header bg-success text-white py-4 text-center">
-                <i class="bi bi-file-earmark-plus-fill display-5 mb-2 opacity-75"></i>
-                <h3 class="card-title fw-bolder mb-0">{{ title }}</h3>
-                <p class="mb-0 mt-2 opacity-75 small">Provide detailed agronomic data for the farm database.</p>
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-header bg-success text-white rounded-top-4 py-3">
+                <h4 class="mb-0 fw-bold"><i class="bi bi-cloud-arrow-up-fill me-2"></i>{{ title|default:"Crop Management" }}</h4>
             </div>
-            <div class="card-body p-5 bg-white">
-                <form method="post" enctype="multipart/form-data">
+            <div class="card-body p-4">
+                <form method="post" enctype="multipart/form-data" novalidate>
                     {% csrf_token %}
-                    {% load crispy_forms_tags %}
+                    
                     <div class="row g-3">
-                        {{ form|crispy }}
+                        <!-- Left Column: Form Fields -->
+                        <div class="col-md-7 border-end pe-4">
+                            {{ form|crispy }}
+                        </div>
+                        
+                        <!-- Right Column: Image Preview -->
+                        <div class="col-md-5 ps-4 text-center">
+                            <h6 class="text-muted fw-bold mb-3 mt-4 mt-md-0">Image Preview</h6>
+                            
+                            <div class="border rounded-4 bg-light d-flex align-items-center justify-content-center overflow-hidden w-100" style="height: 200px; border: 2px dashed #dee2e6 !important;">
+                                <img id="imagePreview" src="{% if form.instance.image %}{{ form.instance.image.url }}{% else %}https://via.placeholder.com/300x200?text=Upload+Image{% endif %}" alt="Image Preview" style="max-width: 100%; max-height: 100%; object-fit: cover;">
+                            </div>
+                            
+                            <p class="small text-muted mt-3"><i class="bi bi-info-circle me-1"></i>Select an image file in the form to see a preview here.</p>
+                        </div>
                     </div>
                     
-                    <div class="d-flex justify-content-between mt-5 pt-4 border-top">
-                        <a href="{% url 'crop_list' %}" class="btn btn-outline-secondary px-4 fw-bold rounded-pill hover-card">
-                            <i class="bi bi-x-circle me-1"></i> Cancel
-                        </a>
-                        <button type="submit" class="btn btn-success px-5 fw-bold rounded-pill shadow hover-card">
-                            <i class="bi bi-cloud-arrow-up-fill me-1"></i> Save Data
-                        </button>
+                    <hr class="my-4 text-muted opacity-25">
+                    
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{% url 'crop_list' %}" class="btn btn-outline-secondary rounded-pill px-4 fw-bold">Cancel</a>
+                        <button type="submit" class="btn btn-success rounded-pill px-5 shadow-sm fw-bold"><i class="bi bi-save-fill me-1"></i> Save Crop</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const fileInput = document.querySelector('input[type="file"]');
+        const imgPreview = document.getElementById('imagePreview');
+        
+        if (fileInput) {
+            fileInput.addEventListener('change', function(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        imgPreview.src = e.target.result;
+                    }
+                    reader.readAsDataURL(file);
+                } else {
+                    imgPreview.src = 'https://via.placeholder.com/300x200?text=Upload+Image';
+                }
+            });
+        }
+    });
+</script>
 {% endblock %}

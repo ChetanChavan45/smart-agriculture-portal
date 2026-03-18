@@ -20,4 +20,6 @@ urlpatterns = [
     path('community-qa/', views.community_qa, name='community_qa'),
     path('query/<int:pk>/', views.question_detail, name='question_detail'),
     path('query/<int:pk>/answer/', views.answer_question, name='answer_question'),
+    
+    path('recommend-crop/', views.crop_recommend, name='crop_recommend'),
 ]
