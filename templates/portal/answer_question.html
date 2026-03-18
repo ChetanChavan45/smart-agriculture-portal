@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="row justify-content-center pt-4">
+    <div class="col-md-9 mb-5">
+        <a href="{% url 'dashboard' %}" class="btn btn-light shadow-sm fw-bold border text-secondary px-4 py-2 hover-card rounded-pill mb-4">
+            <i class="bi bi-arrow-left me-1"></i> Dashboard
+        </a>
+        
+        <div class="card shadow border-0 rounded-4 overflow-hidden bg-white mb-4 border-start border-warning border-5 px-4 py-2">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3 text-muted">
+                    <i class="bi bi-person-circle fs-4 me-2"></i>
+                    <h5 class="fw-bold mb-0">Farmer: <span class="text-dark">{{ query.farmer.username }}</span></h5>
+                </div>
+                <h4 class="fw-bolder lh-base mb-0 pb-3 mt-4 text-dark fst-italic">"{{ query.question }}"</h4>
+            </div>
+        </div>
+
+        <div class="card shadow border-0 rounded-4 overflow-hidden bg-white">
+            <div class="card-header bg-dark text-white py-4 text-center">
+                <i class="bi bi-reply-all-fill display-5 mb-2 text-success opacity-75"></i>
+                <h3 class="card-title fw-bolder mb-0">Expert Findings & Advice</h3>
+                <p class="mb-0 mt-2 opacity-75 small">Provide an actionable, scientific answer to the query.</p>
+            </div>
+            <div class="card-body p-5">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-4">
+                        {{ form|crispy }}
+                    </div>
+                    <div class="d-grid mt-4 pt-3 border-top">
+                        <button type="submit" class="btn btn-success btn-lg fw-bold rounded-pill hover-card py-3">
+                            Publish Answer <i class="bi bi-send-check-fill ms-2"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-9 mb-5">
+        <div class="card shadow-sm border-0 mt-4 rounded-4 overflow-hidden">
+            <div class="card-header bg-success text-white py-4 text-center">
+                <i class="bi bi-file-earmark-plus-fill display-5 mb-2 opacity-75"></i>
+                <h3 class="card-title fw-bolder mb-0">{{ title }}</h3>
+                <p class="mb-0 mt-2 opacity-75 small">Provide detailed agronomic data for the farm database.</p>
+            </div>
+            <div class="card-body p-5 bg-white">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {% load crispy_forms_tags %}
+                    <div class="row g-3">
+                        {{ form|crispy }}
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mt-5 pt-4 border-top">
+                        <a href="{% url 'crop_list' %}" class="btn btn-outline-secondary px-4 fw-bold rounded-pill hover-card">
+                            <i class="bi bi-x-circle me-1"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-success px-5 fw-bold rounded-pill shadow hover-card">
+                            <i class="bi bi-cloud-arrow-up-fill me-1"></i> Save Data
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,255 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 pt-3">
+    <div>
+        <h2 class="fw-bolder mb-0 text-success"><i class="bi bi-grid-fill me-2"></i> Farmer Dashboard</h2>
+        <p class="text-muted fw-medium mt-1 mb-0">Welcome back, {{ user.username }}! Here's your farm summary.</p>
+    </div>
+    <a href="{% url 'ask_question' %}" class="btn btn-success shadow-sm rounded-pill fw-bold px-4 py-2 hover-card">
+        <i class="bi bi-patch-question-fill me-1"></i> Ask Expert
+    </a>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row g-4 mb-5">
+    <div class="col-6 col-lg-3">
+        <div class="card border-0 shadow-sm h-100 bg-white" style="border-left: 4px solid #198754 !important;">
+            <div class="card-body p-4 text-center text-sm-start d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-muted fw-bold mb-1 text-uppercase text-secondary" style="font-size: 0.8rem;">Database Crops</h6>
+                    <h2 class="mb-0 fw-bolder">{{ total_crops }}</h2>
+                </div>
+                <div class="bg-success-subtle p-3 rounded-circle d-none d-sm-block">
+                    <i class="bi bi-tree-fill fs-4 text-success"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card border-0 shadow-sm h-100 bg-white" style="border-left: 4px solid #0d6efd !important;">
+            <div class="card-body p-4 text-center text-sm-start d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-muted fw-bold mb-1 text-uppercase text-secondary" style="font-size: 0.8rem;">Questions Asked</h6>
+                    <h2 class="mb-0 fw-bolder">{{ questions_asked }}</h2>
+                </div>
+                <div class="bg-primary-subtle p-3 rounded-circle d-none d-sm-block">
+                    <i class="bi bi-question-circle-fill fs-4 text-primary"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card border-0 shadow-sm h-100 bg-white" style="border-left: 4px solid #ffc107 !important;">
+            <div class="card-body p-4 text-center text-sm-start d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-muted fw-bold mb-1 text-uppercase text-secondary" style="font-size: 0.8rem;">Pending Review</h6>
+                    <h2 class="mb-0 fw-bolder">{{ pending_questions }}</h2>
+                </div>
+                <div class="bg-warning-subtle p-3 rounded-circle d-none d-sm-block">
+                    <i class="bi bi-hourglass-split fs-4 text-warning"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card border-0 shadow-sm h-100 bg-white" style="border-left: 4px solid #20c997 !important;">
+            <div class="card-body p-4 text-center text-sm-start d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-muted fw-bold mb-1 text-uppercase text-secondary" style="font-size: 0.8rem;">Expert Answers</h6>
+                    <h2 class="mb-0 fw-bolder">{{ questions_answered }}</h2>
+                </div>
+                <div class="bg-info-subtle p-3 rounded-circle d-none d-sm-block">
+                    <i class="bi bi-check-circle-fill fs-4 text-info"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Chart Section -->
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm h-100 p-4">
+            <h5 class="fw-bold mb-4 border-bottom pb-3"><i class="bi bi-graph-up text-primary me-2"></i>Questions Submitted (7 Days)</h5>
+            <canvas id="questionsChart" style="max-height: 250px;"></canvas>
+        </div>
+    </div>
+    
+    <!-- Weather Widget (JS generated via Open-Meteo) -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm h-100 weather-widget p-4 text-center position-relative overflow-hidden">
+            <i class="bi bi-cloud-sun-fill text-white opacity-25" style="font-size: 15rem; position: absolute; top: -50px; right: -50px; z-index: 1;"></i>
+            <div style="z-index: 2; position: relative;" id="weather-content">
+                <h5 class="fw-bold mb-4 pb-2 border-bottom border-light w-100"><i class="bi bi-geo-alt-fill me-2"></i>Local Weather</h5>
+                <div class="spinner-border text-light mt-4" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-3 small">Locating your farm...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Table Section -->
+<div class="card border-0 shadow-sm mt-5 mb-5 p-4 rounded-4">
+    <div class="d-flex justify-content-between align-items-center pb-3 border-bottom mb-4">
+        <h5 class="fw-bold mb-0"><i class="bi bi-journal-text text-success me-2"></i>Recent Question Activity</h5>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle border-bottom border-top">
+            <thead class="table-light">
+                <tr>
+                    <th scope="col" class="text-secondary fw-bold small">QUESTION</th>
+                    <th scope="col" class="text-secondary fw-bold small">STATUS</th>
+                    <th scope="col" class="text-secondary fw-bold small">EXPERT</th>
+                    <th scope="col" class="text-secondary fw-bold small">DATE</th>
+                    <th scope="col" class="text-secondary fw-bold small text-end">ACTION</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for query in queries %}
+                <tr>
+                    <td>
+                        <div class="fw-bold text-dark">{{ query.question|truncatechars:50 }}</div>
+                    </td>
+                    <td>
+                        {% if query.is_answered %}
+                            <span class="badge bg-success-subtle text-success px-3 py-2 rounded-pill fw-bold"><i class="bi bi-check-circle-fill me-1"></i> Answered</span>
+                        {% else %}
+                            <span class="badge bg-warning-subtle text-warning px-3 py-2 rounded-pill fw-bold"><i class="bi bi-clock-fill me-1"></i> Pending</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if query.is_answered %}
+                            <span class="d-flex align-items-center">
+                                <div class="bg-dark text-white rounded-circle d-flex justify-content-center align-items-center me-2" style="width: 30px; height: 30px; font-size: 0.8rem;">
+                                    <span class="fw-bold">{{ query.response.expert.username|make_list|first|upper }}</span>
+                                </div>
+                                <span class="fw-medium text-dark">{{ query.response.expert.username }}</span>
+                            </span>
+                        {% else %}
+                            <span class="text-muted fst-italic"><i class="bi bi-dash"></i> Unassigned</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="text-muted small fw-medium">{{ query.date_created|date:"M d, Y" }}</span>
+                    </td>
+                    <td class="text-end">
+                        <a href="{% url 'question_detail' query.id %}" class="btn btn-sm btn-light border fw-bold text-success hover-card px-3">View</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center py-5">
+                        <i class="bi bi-inbox fs-1 text-muted opacity-50 d-block mb-3"></i>
+                        <p class="text-muted mb-0 fw-medium">You haven't submitted any questions yet.</p>
+                        <a href="{% url 'ask_question' %}" class="btn btn-outline-success btn-sm mt-3 px-4 rounded-pill">Ask a Question Now</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Initialize Chart.js
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('questionsChart').getContext('2d');
+        const labels = JSON.parse('{{ chart_labels|safe }}');
+        const data = JSON.parse('{{ chart_data|safe }}');
+        
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Questions Asked',
+                    data: data,
+                    borderColor: '#0d6efd',
+                    backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                    borderWidth: 3,
+                    pointBackgroundColor: '#fff',
+                    pointBorderColor: '#0d6efd',
+                    pointBorderWidth: 2,
+                    pointRadius: 4,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { beginAtZero: true, grid: { borderDash: [2, 4] } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+
+        // Initialize Weather via free Open-Meteo API
+        if ("geolocation" in navigator) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+                
+                // Fetch from Free Open-Meteo
+                fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&hourly=relativehumidity_2m,precipitation_probability&timezone=auto`)
+                .then(response => response.json())
+                .then(data => {
+                    const temp = data.current_weather.temperature;
+                    const code = data.current_weather.weathercode;
+                    const humidity = data.hourly.relativehumidity_2m[0];
+                    const rain = data.hourly.precipitation_probability[0];
+                    
+                    let icon = 'bi-cloud-sun';
+                    let condition = 'Partly Cloudy';
+                    if (code === 0) { icon = 'bi-sun'; condition = 'Clear Sky'; }
+                    else if (code > 0 && code <= 3) { icon = 'bi-cloud'; condition = 'Cloudy'; }
+                    else if (code >= 51 && code <= 67) { icon = 'bi-cloud-rain'; condition = 'Rain'; }
+                    else if (code >= 71 && code <= 77) { icon = 'bi-snow'; condition = 'Snow'; }
+                    else if (code >= 95) { icon = 'bi-lightning'; condition = 'Thunderstorm'; }
+
+                    document.getElementById('weather-content').innerHTML = `
+                        <h5 class="fw-bold mb-3 pb-2 border-bottom border-light w-100 text-start"><i class="bi bi-geo-alt-fill me-2 fs-5"></i>Your Location</h5>
+                        <div class="d-flex justify-content-center align-items-center mb-4 mt-4">
+                            <i class="bi ${icon} display-1 me-3"></i>
+                            <div class="text-start">
+                                <h1 class="display-4 fw-bold mb-0">${temp}°C</h1>
+                                <p class="fs-5 mb-0 fw-medium">${condition}</p>
+                            </div>
+                        </div>
+                        <div class="row w-100 g-3 border-top border-light pt-3 mt-4 text-start">
+                            <div class="col-6">
+                                <div class="small opacity-75 fw-bold text-uppercase"><i class="bi bi-water me-1"></i> Humidity</div>
+                                <div class="fs-5 fw-bold">${humidity}%</div>
+                            </div>
+                            <div class="col-6">
+                                <div class="small opacity-75 fw-bold text-uppercase"><i class="bi bi-cloud-drizzle me-1"></i> Rain Prob.</div>
+                                <div class="fs-5 fw-bold">${rain}%</div>
+                            </div>
+                        </div>
+                    `;
+                })
+                .catch(e => showError());
+            }, showError);
+        } else {
+            showError();
+        }
+        
+        function showError() {
+            document.getElementById('weather-content').innerHTML = `
+                <h5 class="fw-bold mb-4 pb-2 border-bottom border-light w-100"><i class="bi bi-geo-alt-fill me-2"></i>Weather Unavailable</h5>
+                <i class="bi bi-cloud-slash display-1 mb-3 d-block"></i>
+                <p>Please enable location services to see local farm weather.</p>
+            `;
+        }
+    });
+</script>
+{% endblock %}

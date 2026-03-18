@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row align-items-center mb-5 pt-3">
+    <div class="col-md-6 mb-3 mb-md-0">
+        <h2 class="fw-bolder mb-1 text-primary"><i class="bi bi-people-fill me-2"></i> Community Q&A</h2>
+        <p class="text-muted fw-medium mb-0">Browse real questions from farmers answered by our verified experts.</p>
+    </div>
+    <div class="col-md-6 text-md-end">
+        <a href="{% url 'ask_question' %}" class="btn btn-primary shadow-sm rounded-pill fw-bold hover-card px-4 py-2">
+            <i class="bi bi-chat-dots-fill me-1"></i> Ask Your Own Question
+        </a>
+    </div>
+</div>
+
+<!-- Search Form -->
+<div class="card border-0 shadow-sm rounded-4 mb-5 p-2 bg-white">
+    <form method="get" class="card-body py-1 px-3 d-flex gap-3 align-items-center">
+        <!-- Search Input -->
+        <div class="input-group">
+            <span class="input-group-text bg-light border-0"><i class="bi bi-search text-muted"></i></span>
+            <input type="text" name="q" class="form-control border-0 bg-light shadow-none" placeholder="Search across all answered questions..." value="{{ search_query }}">
+        </div>
+        
+        <button type="submit" class="btn btn-dark fw-bold rounded-pill px-4 hover-card" style="min-width: 120px;">Search</button>
+        {% if search_query %}
+             <a href="{% url 'community_qa' %}" class="btn btn-light fw-bold rounded-pill text-muted hover-card">Clear</a>
+        {% endif %}
+    </form>
+</div>
+
+<!-- Results -->
+{% if search_query %}
+    <p class="mb-4 fw-bold text-secondary">
+        <i class="bi bi-search me-1"></i> Showing search results for "<span class="text-dark">{{ search_query }}</span>"
+    </p>
+{% endif %}
+
+<div class="row g-4 mb-5">
+    {% for query in queries %}
+    <div class="col-12">
+        <div class="card shadow-sm border-0 rounded-4 overflow-hidden bg-white mb-2 pb-2">
+            <!-- Question section -->
+            <div class="card-body p-4 pb-3 border-bottom position-relative border-start border-warning border-5">
+                <i class="bi bi-question-circle text-warning opacity-10 fs-1 position-absolute top-0 end-0 m-3"></i>
+                <div class="d-flex align-items-center mb-2">
+                    <span class="badge bg-light text-secondary border px-3 py-1 rounded-pill fw-medium small me-2">
+                        <i class="bi bi-calendar3 me-1"></i> {{ query.date_created|date:"M d, Y" }}
+                    </span>
+                    <span class="text-muted small fw-bold"><i class="bi bi-person-fill"></i> Farmer: <span class="text-dark">{{ query.farmer.username }}</span></span>
+                </div>
+                <h5 class="fw-bolder lh-base mb-0 mt-2 text-dark">"{{ query.question }}"</h5>
+            </div>
+            
+            <!-- Answer section -->
+            <div class="card-body p-4 pt-3 position-relative border-start border-success border-5 bg-success-subtle bg-opacity-10">
+                <i class="bi bi-patch-check text-success opacity-10 fs-1 position-absolute top-0 end-0 m-3"></i>
+                <div class="d-flex align-items-center mb-2">
+                    <span class="badge bg-success text-white px-3 py-1 rounded-pill fw-bold small me-2 shadow-sm">
+                        <i class="bi bi-award-fill me-1"></i> Verified Expert Answer
+                    </span>
+                    <span class="text-success small fw-bold"><i class="bi bi-person-check-fill"></i> Expert: <span class="text-dark">{{ query.response.expert.username }}</span></span>
+                </div>
+                <p class="fs-6 fw-medium lh-base mb-3 mt-3 text-dark" style="white-space: pre-wrap;">{{ query.response.answer }}</p>
+                <a href="{% url 'question_detail' query.id %}" class="btn btn-sm btn-outline-success fw-bold rounded-pill px-3 mt-1 hover-card">View Thread <i class="bi bi-arrow-right-short align-middle"></i></a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12 w-100">
+        <div class="text-center text-muted p-5 bg-white shadow-sm rounded-4 border">
+            <i class="bi bi-journal-x display-1 opacity-25 mb-4 d-block"></i>
+            <h4 class="fw-bolder text-dark">No Q&A Found</h4>
+            <p class="fs-5">We couldn't find any expert answers matching your search.</p>
+            <a href="{% url 'community_qa' %}" class="btn btn-outline-primary rounded-pill fw-bold mt-3 px-4 py-2">Clear Search</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Pagination -->
+{% if queries.has_other_pages %}
+<nav aria-label="QA pagination" class="mb-5 d-flex justify-content-center">
+    <ul class="pagination pagination-lg shadow-sm">
+        {% if queries.has_previous %}
+            <li class="page-item">
+                <a class="page-link text-primary fw-bolder px-4" href="?page={{ queries.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}">&laquo;</a>
+            </li>
+        {% else %}
+            <li class="page-item disabled"><span class="page-link px-4 fw-bolder">&laquo;</span></li>
+        {% endif %}
+
+        {% for num in queries.paginator.page_range %}
+            {% if queries.number == num %}
+                <li class="page-item active"><span class="page-link bg-primary border-primary fw-bolder">{{ num }}</span></li>
+            {% else %}
+                <li class="page-item">
+                    <a class="page-link text-dark fw-bolder" href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}">{{ num }}</a>
+                </li>
+            {% endif %}
+        {% endfor %}
+
+        {% if queries.has_next %}
+            <li class="page-item">
+                <a class="page-link text-primary fw-bolder px-4" href="?page={{ queries.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}">&raquo;</a>
+            </li>
+        {% else %}
+            <li class="page-item disabled"><span class="page-link px-4 fw-bolder">&raquo;</span></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+{% endblock %}

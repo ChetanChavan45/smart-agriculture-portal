@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="{% url 'crop_list' %}" class="btn btn-light shadow-sm fw-bold border text-secondary px-4 py-2 hover-card rounded-pill">
+        <i class="bi bi-arrow-left me-1"></i> Back to Directory
+    </a>
+</div>
+
+<div class="row g-4 mb-5">
+    <!-- Left Column: Image -->
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100 bg-white p-3">
+            <div class="rounded-4 overflow-hidden position-relative h-100" style="min-height: 350px;">
+                {% if crop.image %}
+                    <img src="{{ crop.image.url }}" class="img-fluid w-100 h-100 object-fit-cover" alt="{{ crop.crop_name }}">
+                {% else %}
+                    <div class="w-100 h-100 bg-success-subtle d-flex flex-column align-items-center justify-content-center">
+                        <i class="bi bi-image text-success opacity-50 display-1 mb-3"></i>
+                        <h4 class="text-success fw-bold opacity-75">No Setup Image</h4>
+                    </div>
+                {% endif %}
+                <span class="position-absolute bottom-0 start-0 m-3 px-4 py-2 bg-dark bg-opacity-75 text-white fw-bold rounded-pill backdrop-blur">
+                    <i class="bi bi-upc-scan me-2"></i> ID: CROP-{{ crop.id }}
+                </span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Right Column: Details -->
+    <div class="col-lg-7">
+        <div class="card border-0 shadow-sm rounded-4 h-100 bg-white">
+            <div class="card-body p-5">
+                <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+                    <div>
+                        <h1 class="display-5 fw-bolder text-dark mb-2">{{ crop.crop_name }}</h1>
+                        {% if crop.category %}
+                            <span class="badge bg-light text-success fs-6 px-3 py-2 border shadow-sm rounded-pill"><i class="bi bi-tag-fill me-1"></i> {{ crop.category }}</span>
+                        {% endif %}
+                    </div>
+                    {% if user.is_expert or user.is_admin %}
+                    <div class="d-flex flex-column gap-2">
+                        <a href="{% url 'crop_update' crop.id %}" class="btn btn-outline-secondary btn-sm rounded-pill fw-bold hover-card"><i class="bi bi-pencil-square me-1"></i> Edit</a>
+                        <a href="{% url 'crop_delete' crop.id %}" class="btn btn-outline-danger btn-sm rounded-pill fw-bold hover-card"><i class="bi bi-trash-fill me-1"></i> Delete</a>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <h5 class="fw-bold text-success mb-3"><i class="bi bi-card-text me-2"></i>Agronomy Overview</h5>
+                <p class="lead mb-5 text-secondary pe-lg-4" style="white-space: pre-wrap; line-height: 1.8;">{{ crop.description }}</p>
+                
+                <div class="bg-light rounded-4 p-4 border border-white shadow-sm">
+                    <h5 class="fw-bold text-dark mb-4 border-bottom border-secondary-subtle pb-3"><i class="bi bi-gear-wide-connected text-primary me-2"></i>Technical Requirements</h5>
+                    
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-white p-3 rounded-circle shadow-sm me-3 border">
+                                    <i class="bi bi-calendar3 fs-4 text-warning"></i>
+                                </div>
+                                <div>
+                                    <h6 class="text-muted fw-bold mb-1 small text-uppercase">Ideal Season</h6>
+                                    <h5 class="fw-bolder mb-0 text-dark">{{ crop.season }}</h5>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-white p-3 rounded-circle shadow-sm me-3 border">
+                                    <i class="bi bi-layers-half fs-4 text-info"></i>
+                                </div>
+                                <div>
+                                    <h6 class="text-muted fw-bold mb-1 small text-uppercase">Soil Profile</h6>
+                                    <h5 class="fw-bolder mb-0 text-dark">{{ crop.soil_type }}</h5>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 mt-4 pt-3 border-top border-secondary-subtle">
+                            <h6 class="text-muted fw-bold mb-3 small text-uppercase"><i class="bi bi-droplet-half text-primary me-1"></i> Fertilizer Strategy</h6>
+                            <div class="bg-white border p-3 rounded-3 text-dark fw-medium lh-base">
+                                {{ crop.fertilizer }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if user.is_farmer %}
+<div class="card border-0 shadow-sm rounded-4 bg-success-subtle p-5 mt-5 mb-5 text-center position-relative overflow-hidden border-start border-success border-5">
+    <i class="bi bi-patch-question text-success opacity-10 display-1 position-absolute top-50 start-50 translate-middle" style="font-size: 15rem;"></i>
+    <div class="position-relative z-index-2">
+        <h3 class="fw-bolder text-dark mb-3">Questions about {{ crop.crop_name }}?</h3>
+        <p class="fs-5 text-secondary mb-4 mx-auto" style="max-width: 600px;">Our network of certified agriculture scientists and experts are standing by to analyze your farm's unique requirements.</p>
+        <a href="{% url 'ask_question' %}" class="btn btn-success btn-lg px-5 py-3 rounded-pill fw-bold shadow hover-card">
+            Request Expert Advice <i class="bi bi-send-fill ms-2"></i>
+        </a>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

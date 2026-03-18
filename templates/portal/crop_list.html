@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row align-items-center mb-5 pt-3">
+    <div class="col-md-6 mb-3 mb-md-0">
+        <h2 class="fw-bolder mb-1 text-success"><i class="bi bi-tree-fill me-2"></i> Crop Knowledge Base</h2>
+        <p class="text-muted fw-medium mb-0">Search our database for expert agronomy information.</p>
+    </div>
+    <div class="col-md-6 text-md-end">
+        {% if user.is_expert or user.is_admin %}
+            <a href="{% url 'crop_create' %}" class="btn btn-success shadow-sm rounded-pill fw-bold hover-card px-4 py-2">
+                <i class="bi bi-plus-lg me-1"></i> Add Crop Profile
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Search & Filter Form -->
+<div class="card border-0 shadow-sm rounded-4 mb-5 p-2 bg-white">
+    <form method="get" class="card-body py-1 px-3 d-flex flex-wrap flex-md-nowrap gap-3 align-items-center">
+        <!-- Search Input -->
+        <div class="input-group">
+            <span class="input-group-text bg-light border-0"><i class="bi bi-search text-muted"></i></span>
+            <input type="text" name="q" class="form-control border-0 bg-light shadow-none" placeholder="Search crops..." value="{{ search_query }}">
+        </div>
+        
+        <!-- Divider -->
+        <div class="vr d-none d-md-block opacity-25"></div>
+        
+        <!-- Season Filter -->
+        <div class="input-group" style="max-width: 250px;">
+            <span class="input-group-text bg-light border-0"><i class="bi bi-funnel text-muted"></i></span>
+            <select name="season" class="form-select border-0 bg-light shadow-none fw-medium text-secondary">
+                <option value="">All Seasons</option>
+                <option value="Summer" {% if season_filter == "Summer" %}selected{% endif %}>Summer</option>
+                <option value="Winter" {% if season_filter == "Winter" %}selected{% endif %}>Winter</option>
+                <option value="Rainy" {% if season_filter == "Rainy" %}selected{% endif %}>Rainy / Monsoon</option>
+                <option value="Spring" {% if season_filter == "Spring" %}selected{% endif %}>Spring</option>
+            </select>
+        </div>
+        
+        <button type="submit" class="btn btn-dark fw-bold rounded-pill px-4 hover-card" style="min-width: 120px;">Filter</button>
+        {% if search_query or season_filter %}
+             <a href="{% url 'crop_list' %}" class="btn btn-light fw-bold rounded-pill text-muted hover-card">Clear</a>
+        {% endif %}
+    </form>
+</div>
+
+<!-- Results -->
+{% if search_query or season_filter %}
+    <p class="mb-4 fw-bold text-secondary">
+        <i class="bi bi-search me-1"></i> Showing results for 
+        {% if search_query %}"<span class="text-dark">{{ search_query }}</span>"{% endif %}
+        {% if search_query and season_filter %} in {% endif %}
+        {% if season_filter %}<span class="text-dark">{{ season_filter }} season</span>{% endif %}
+    </p>
+{% endif %}
+
+<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-5">
+    {% for crop in crops %}
+    <div class="col">
+        <div class="card h-100 shadow-sm border-0 rounded-4 overflow-hidden hover-card bg-white">
+            <div class="position-relative">
+                {% if crop.image %}
+                    <img src="{{ crop.image.url }}" class="card-img-top object-fit-cover" alt="{{ crop.crop_name }}" style="height: 220px;">
+                {% else %}
+                    <div class="card-img-top bg-success-subtle d-flex align-items-center justify-content-center" style="height: 220px;">
+                        <i class="bi bi-flower3 text-success opacity-50 display-1"></i>
+                    </div>
+                {% endif %}
+                <span class="position-absolute top-0 end-0 m-3 badge bg-white text-dark shadow-sm fw-bold px-3 py-2 rounded-pill">
+                    <i class="bi bi-calendar3 me-1 text-success"></i>{{ crop.season }}
+                </span>
+            </div>
+            
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center mb-3">
+                    <h4 class="card-title fw-bolder mb-0 flex-grow-1">{{ crop.crop_name }}</h4>
+                    {% if crop.category %}
+                        <span class="badge bg-light text-secondary border px-2 py-1">{{ crop.category }}</span>
+                    {% endif %}
+                </div>
+                
+                <div class="d-flex flex-column gap-2 mb-4 text-muted small fw-medium">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-layers-half text-warning me-2 fs-5"></i> 
+                        <span>{{ crop.soil_type }} Soil Recommended</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-droplet-half text-info me-2 fs-5"></i>
+                        <span class="text-truncate">{{ crop.fertilizer }}</span>
+                    </div>
+                </div>
+                
+                <p class="card-text text-secondary mb-0 p-3 bg-light rounded-3 shadow-sm border border-light" style="font-size: 0.9rem;">
+                    {{ crop.description|truncatewords:15 }}
+                </p>
+            </div>
+            <div class="card-footer bg-white border-0 px-4 pb-4 pt-0">
+                <a href="{% url 'crop_detail' crop.id %}" class="btn btn-success fw-bold w-100 rounded-pill hover-card py-2">
+                    Open Field Guide <i class="bi bi-arrow-right-short ms-1 fs-5 align-middle"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12 w-100">
+        <div class="text-center text-muted p-5 bg-white shadow-sm rounded-4 border">
+            <i class="bi bi-x-circle display-1 opacity-25 mb-4 d-block"></i>
+            <h4 class="fw-bolder text-dark">No Crops Found</h4>
+            <p class="fs-5">We couldn't find any agriculture configurations matching your search filters.</p>
+            <a href="{% url 'crop_list' %}" class="btn btn-outline-success rounded-pill fw-bold mt-3 px-4 py-2">Clear Filters</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Pagination -->
+{% if crops.has_other_pages %}
+<nav aria-label="Crop pagination" class="mb-5 d-flex justify-content-center">
+    <ul class="pagination pagination-lg">
+        {% if crops.has_previous %}
+            <li class="page-item">
+                <a class="page-link text-success fw-bolder px-4" href="?page={{ crops.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if season_filter %}&season={{ season_filter }}{% endif %}">&laquo;</a>
+            </li>
+        {% else %}
+            <li class="page-item disabled"><span class="page-link px-4 fw-bolder">&laquo;</span></li>
+        {% endif %}
+
+        {% for num in crops.paginator.page_range %}
+            {% if crops.number == num %}
+                <li class="page-item active"><span class="page-link bg-success border-success fw-bolder">{{ num }}</span></li>
+            {% else %}
+                <li class="page-item">
+                    <a class="page-link text-dark fw-bolder" href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}{% if season_filter %}&season={{ season_filter }}{% endif %}">{{ num }}</a>
+                </li>
+            {% endif %}
+        {% endfor %}
+
+        {% if crops.has_next %}
+            <li class="page-item">
+                <a class="page-link text-success fw-bolder px-4" href="?page={{ crops.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if season_filter %}&season={{ season_filter }}{% endif %}">&raquo;</a>
+            </li>
+        {% else %}
+            <li class="page-item disabled"><span class="page-link px-4 fw-bolder">&raquo;</span></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+{% endblock %}

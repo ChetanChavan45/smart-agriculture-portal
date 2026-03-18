@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 pt-3 border-bottom pb-4">
+    <div>
+        <h2 class="fw-bolder mb-0 text-dark"><i class="bi bi-shield-lock-fill text-danger me-2"></i> System Administrator</h2>
+        <p class="text-muted fw-medium mt-1 mb-0">Platform overview and user activity logs.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'crop_create' %}" class="btn btn-outline-success shadow-sm rounded-pill fw-bold px-4 hover-card">
+            <i class="bi bi-cloud-arrow-up-fill me-1"></i> Add Crop
+        </a>
+        <a href="{% url 'admin:index' %}" class="btn btn-dark shadow-sm rounded-pill fw-bold px-4 hover-card" target="_blank">
+            <i class="bi bi-gear-fill me-1"></i> Superuser Panel
+        </a>
+    </div>
+</div>
+
+<div class="row g-4 mb-5">
+    <!-- Stat Cards -->
+    <div class="col-md-4">
+        <div class="card h-100 border-0 shadow-sm p-4 hover-card bg-primary text-white rounded-4 overflow-hidden position-relative" style="background: linear-gradient(135deg, #0d6efd 0%, #0099ff 100%);">
+            <i class="bi bi-people-fill opacity-25" style="font-size: 8rem; position: absolute; right: -20px; bottom: -30px;"></i>
+            <h5 class="fw-bolder opacity-75 mb-1 text-uppercase small"><i class="bi bi-person-badge me-2"></i>Total Users</h5>
+            <h1 class="display-3 fw-bolder mb-0 position-relative z-index-2">{{ users }}</h1>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100 border-0 shadow-sm p-4 hover-card bg-success text-white rounded-4 overflow-hidden position-relative" style="background: linear-gradient(135deg, #198754 0%, #20c997 100%);">
+            <i class="bi bi-tree-fill opacity-25" style="font-size: 8rem; position: absolute; right: -20px; bottom: -30px;"></i>
+            <h5 class="fw-bolder opacity-75 mb-1 text-uppercase small"><i class="bi bi-database-fill me-2"></i>Crop Database</h5>
+            <h1 class="display-3 fw-bolder mb-0 position-relative z-index-2">{{ crops }}</h1>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100 border-0 shadow-sm p-4 hover-card bg-info text-white rounded-4 overflow-hidden position-relative" style="background: linear-gradient(135deg, #0dcaf0 0%, #00b4d8 100%);">
+            <i class="bi bi-question-circle-fill opacity-25" style="font-size: 8rem; position: absolute; right: -20px; bottom: -30px;"></i>
+            <h5 class="fw-bolder opacity-75 mb-1 text-uppercase small"><i class="bi bi-chat-square-text-fill me-2"></i>Total Queries</h5>
+            <h1 class="display-3 fw-bolder mb-0 position-relative z-index-2">{{ queries }}</h1>
+        </div>
+    </div>
+</div>
+
+<!-- Activity Log -->
+<div class="card border-0 shadow-sm mt-4 p-4 rounded-4 mb-5">
+    <div class="d-flex align-items-center mb-4 pb-3 border-bottom">
+        <div class="bg-dark p-2 rounded-circle me-3">
+            <i class="bi bi-activity text-white fs-4"></i>
+        </div>
+        <h5 class="fw-bold mb-0">Platform Activity Stream</h5>
+    </div>
+    
+    <div class="table-responsive">
+        <table class="table table-hover align-middle border-bottom">
+            <thead class="table-light">
+                <tr>
+                    <th scope="col" class="text-secondary fw-bold small">USER</th>
+                    <th scope="col" class="text-secondary fw-bold small">ACTION</th>
+                    <th scope="col" class="text-secondary fw-bold small text-end">TIMESTAMP</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in recent_activity %}
+                <tr>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-person-circle fs-4 text-secondary me-2"></i>
+                            <div>
+                                <div class="fw-bold text-dark">{{ log.user.username }}</div>
+                                <div class="small text-muted">{{ log.user.get_role_display }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="text-dark fw-medium">{{ log.action }}</span>
+                    </td>
+                    <td class="text-end">
+                        <span class="badge bg-light text-secondary border px-3 py-2 rounded-pill fw-medium">
+                            <i class="bi bi-clock-history me-1"></i> {{ log.timestamp|timesince }} ago
+                        </span>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="text-center py-5">
+                        <i class="bi bi-wind fs-1 text-muted opacity-50 d-block mb-3"></i>
+                        <p class="text-muted mb-0 fw-medium">No system activity logged yet.</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

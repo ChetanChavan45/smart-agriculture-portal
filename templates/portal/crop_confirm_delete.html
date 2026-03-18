@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow border-0 mt-5 border-danger border-top border-4">
+            <div class="card-body p-5 text-center bg-light rounded-bottom">
+                <i class="bi bi-exclamation-triangle-fill text-danger display-1 mb-4"></i>
+                <h3 class="card-title text-danger fw-bold">Delete Crop Record?</h3>
+                <p class="lead mb-4">Are you absolutely sure you want to delete the agriculture record for <strong>"{{ crop.crop_name }}"</strong>?</p>
+                
+                <div class="alert alert-warning text-start">
+                    <strong>Warning:</strong> This action cannot be undone. All references to this crop will be permanently removed from the system.
+                </div>
+                
+                <form method="post" class="mt-4">
+                    {% csrf_token %}
+                    <div class="d-flex justify-content-center gap-3 w-100">
+                        <a href="{% url 'crop_detail' crop.id %}" class="btn btn-secondary btn-lg px-4 shadow-sm">Cancel</a>
+                        <button type="submit" class="btn btn-danger btn-lg px-5 shadow-sm">Yes, Delete</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

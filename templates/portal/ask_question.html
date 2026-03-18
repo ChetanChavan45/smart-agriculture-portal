@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="row justify-content-center pt-4">
+    <div class="col-md-8 mb-5">
+        <a href="{% url 'dashboard' %}" class="btn btn-light shadow-sm fw-bold border text-secondary px-4 py-2 hover-card rounded-pill mb-4">
+            <i class="bi bi-arrow-left me-1"></i> Cancel
+        </a>
+        <div class="card shadow border-0 rounded-4 overflow-hidden bg-white">
+            <div class="card-header bg-success text-white py-4 text-center">
+                <i class="bi bi-chat-right-quote-fill display-5 mb-2 opacity-75"></i>
+                <h3 class="card-title fw-bolder mb-0">Ask the Experts</h3>
+                <p class="mb-0 mt-2 opacity-75 small">Describe your farm issue in detail.</p>
+            </div>
+            <div class="card-body p-5">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-4">
+                        {{ form|crispy }}
+                    </div>
+                    <div class="d-grid mt-4 pt-3 border-top">
+                        <button type="submit" class="btn btn-success btn-lg fw-bold rounded-pill hover-card py-3">
+                            Submit Question <i class="bi bi-send-fill ms-2"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

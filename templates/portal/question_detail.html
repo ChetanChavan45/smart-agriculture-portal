@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center pt-4">
+    <div class="col-md-9 mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <a href="{% url 'dashboard' %}" class="btn btn-light shadow-sm fw-bold border text-secondary px-4 py-2 hover-card rounded-pill">
+                <i class="bi bi-arrow-left me-1"></i> Dashboard
+            </a>
+            <div>
+                {% if query.is_answered %}
+                    <span class="badge bg-success-subtle border border-success text-success px-4 py-2 rounded-pill shadow-sm fw-bold fs-6"><i class="bi bi-check-circle-fill me-2"></i> Case Solved</span>
+                {% else %}
+                    <span class="badge bg-warning-subtle border border-warning text-dark px-4 py-2 rounded-pill shadow-sm fw-bold fs-6"><i class="bi bi-clock-fill me-2"></i> Pending Expert Review</span>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Farmer Question -->
+        <div class="card shadow border-0 rounded-4 overflow-hidden bg-white mb-4 border-start border-warning border-5 position-relative">
+            <i class="bi bi-question-square text-warning opacity-10 display-1 position-absolute" style="top: 20px; right: 20px;"></i>
+            <div class="card-body p-5">
+                <div class="d-flex align-items-center mb-4 text-muted pb-3 border-bottom">
+                    <div class="bg-light p-3 rounded-circle me-3 border">
+                        <i class="bi bi-person-bounding-box fs-3 text-secondary"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold mb-0 text-dark">Farmer Inquiry</h5>
+                        <p class="mb-0 small fw-medium mt-1">Submitted by <span class="text-success">{{ query.farmer.username }}</span> on {{ query.date_created|date:"M d, Y" }}</p>
+                    </div>
+                </div>
+                <h4 class="fw-bolder lh-base mb-0 py-2 text-dark" style="white-space: pre-wrap;">"{{ query.question }}"</h4>
+            </div>
+        </div>
+
+        <!-- Expert Answer -->
+        {% if query.is_answered %}
+        <div class="card shadow border-0 rounded-4 overflow-hidden bg-white mt-5 border-start border-success border-5 position-relative">
+            <i class="bi bi-patch-check text-success opacity-10 display-1 position-absolute" style="top: 20px; right: 20px;"></i>
+            <div class="card-body p-5">
+                <div class="d-flex align-items-center mb-4 text-muted pb-3 border-bottom">
+                    <div class="bg-success-subtle p-3 rounded-circle me-3 border border-success">
+                        <i class="bi bi-award-fill fs-3 text-success"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold mb-0 text-success">Verified Expert Advice</h5>
+                        <p class="mb-0 small fw-medium mt-1">Analyzed by <span class="text-dark fw-bold">{{ query.response.expert.username }}</span> on {{ query.response.date|date:"M d, Y" }}</p>
+                    </div>
+                </div>
+                <div class="bg-light p-4 rounded-4 border">
+                    <p class="fs-5 fw-medium lh-base mb-0 text-dark" style="white-space: pre-wrap;">{{ query.response.answer }}</p>
+                </div>
+            </div>
+        </div>
+        {% elif user.is_expert %}
+        <div class="text-center mt-5 p-5 bg-white border rounded-4 shadow-sm">
+            <h4 class="fw-bold mb-3">You haven't responded yet</h4>
+            <a href="{% url 'answer_question' query.id %}" class="btn btn-dark shadow-sm rounded-pill hover-card fw-bold px-4 py-2 mt-2">
+                Draft Response <i class="bi bi-pencil-square ms-2"></i>
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

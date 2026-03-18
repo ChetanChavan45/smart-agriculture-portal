@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="row align-items-center py-5 gx-5 min-vh-50">
+    <div class="col-lg-6 mb-5 mb-lg-0 text-center text-lg-start">
+        <div class="badge bg-success-subtle text-success px-3 py-2 rounded-pill mb-3 fw-bold fs-6">
+            <i class="bi bi-star-fill text-warning me-1"></i> Agriculture Intelligence
+        </div>
+        <h1 class="display-3 fw-bolder mb-4 text-dark lh-sm">
+            Empowering Farmers<br>with <span class="text-success">Smart</span> Knowledge
+        </h1>
+        <p class="lead fw-normal text-muted mb-5 pe-lg-5">
+            Get comprehensive data on every crop phase, ask professional agronomy experts your questions directly, and join a support ecosystem driving the future of agriculture.
+        </p>
+        <div class="d-grid gap-3 d-sm-flex justify-content-sm-center justify-content-lg-start">
+            <a class="btn btn-success btn-lg px-5 py-3 rounded-pill fw-bold shadow hover-card" href="{% url 'crop_list' %}">
+                <i class="bi bi-search me-2"></i> Explore Crops
+            </a>
+            <a class="btn btn-outline-dark btn-lg px-5 py-3 rounded-pill fw-bold hover-card bg-white" href="{% url 'community_qa' %}">
+                <i class="bi bi-chat-dots me-2"></i> View Expert Q&A
+            </a>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <img class="img-fluid rounded-4 shadow-lg" src="https://images.unsplash.com/photo-1625246333195-78d9c38ad449?q=80&w=1000&auto=format&fit=crop" alt="Smart Farming" />
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="py-5 mt-5">
+    <div class="text-center mb-5">
+        <h2 class="fw-bold display-6 mb-3">Everything You Need to Succeed</h2>
+        <p class="text-muted fs-5">Premium features designed for modern farming problems.</p>
+    </div>
+    <div class="row g-4 pt-2">
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm p-4 hover-card text-center text-md-start">
+                <div class="card-body">
+                    <div class="bg-success-subtle d-inline-block p-3 rounded-circle mb-4">
+                        <i class="bi bi-book-half fs-2 text-success"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Crop Knowledge Base</h4>
+                    <p class="text-muted">A deep library of soil, season, and fertilizer data curated by industry professionals to optimize your yields.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm p-4 hover-card text-center text-md-start">
+                <div class="card-body">
+                    <div class="bg-warning-subtle d-inline-block p-3 rounded-circle mb-4">
+                        <i class="bi bi-person-check-fill fs-2 text-warning"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Expert Advice</h4>
+                    <p class="text-muted">Submit text and images of your farm problems directly to verified agriculture scientists for 24/7 troubleshooting.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm p-4 hover-card text-center text-md-start">
+                <div class="card-body">
+                    <div class="bg-primary-subtle d-inline-block p-3 rounded-circle mb-4">
+                        <i class="bi bi-people-fill fs-2 text-primary"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Community Support</h4>
+                    <p class="text-muted">Join an ever-growing network of farmers. Share insights, success stories, and local techniques globally.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Featured Crops -->
+<div class="py-5 mt-2 mb-5">
+    <div class="d-flex justify-content-between align-items-end mb-4 border-bottom pb-3">
+        <div>
+            <h2 class="fw-bold mb-1">Featured Crops Database</h2>
+            <p class="text-muted mb-0">Explore what you can plant right now</p>
+        </div>
+        <a href="{% url 'crop_list' %}" class="btn btn-outline-success rounded-pill px-4 fs-6">View Directory <i class="bi bi-arrow-right ms-1"></i></a>
+    </div>
+    
+    <div class="row row-cols-1 row-cols-md-3 g-4 pt-3">
+        {% for crop in crops %}
+        <div class="col">
+            <div class="card h-100 border-0 shadow-sm overflow-hidden hover-card">
+                {% if crop.image %}
+                    <img src="{{ crop.image.url }}" class="card-img-top" alt="{{ crop.crop_name }}" style="height: 200px; object-fit: cover;">
+                {% else %}
+                    <div class="card-img-top bg-success-subtle d-flex align-items-center justify-content-center" style="height: 200px;">
+                        <i class="bi bi-flower1 text-success opacity-50 display-1"></i>
+                    </div>
+                {% endif %}
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h4 class="card-title fw-bold text-dark mb-0">{{ crop.crop_name }}</h4>
+                        <span class="badge bg-success rounded-pill fw-medium"><i class="bi bi-cloud-sun me-1"></i>{{ crop.season }}</span>
+                    </div>
+                    <hr class="text-muted mt-3 mb-3">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="bi bi-layers-half text-muted me-2"></i>
+                        <span class="small fw-medium text-dark">{{ crop.soil_type }}</span>
+                    </div>
+                    <p class="card-text text-muted small mt-3">{{ crop.description|truncatewords:15 }}</p>
+                </div>
+                <div class="card-footer bg-white border-0 p-3 pt-0">
+                    <a href="{% url 'crop_detail' crop.id %}" class="btn btn-light text-success w-100 fw-bold border">View Requirements <i class="bi bi-chevron-right ms-1 small"></i></a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="p-5 text-center bg-white rounded-4 shadow-sm border text-muted">
+                <i class="bi bi-box-seam display-1 text-muted opacity-50 mb-3 block"></i>
+                <h4 class="fw-bold">Database Empty</h4>
+                <p>No agricultural data has been added by our experts yet.</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
